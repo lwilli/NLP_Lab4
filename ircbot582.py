@@ -29,7 +29,7 @@ import irc.strings
 from irc.client import ip_numstr_to_quad, ip_quad_to_numstr
 from bs4 import BeautifulSoup
 import requests
-import re
+import re, time
 
 class TestBot(irc.bot.SingleServerIRCBot):
     url = "http://cplug.org/about/a-brief-history-of-cplug/"
@@ -145,6 +145,9 @@ class TestBot(irc.bot.SingleServerIRCBot):
             c.ctcp("DCC", nick, "CHAT chat %s %d" % (
                 ip_quad_to_numstr(dcc.localaddress),
                 dcc.localport))
+        elif cmd == "*forget":
+            #forgets stuff
+            pass
         elif re.search('who was ([\w ]+) in (\d+)?', cmd.lower()): 
             match = re.search('who was ([\w ]+) in (\d+)?', cmd.lower())
             if (match == None):
@@ -180,6 +183,9 @@ class TestBot(irc.bot.SingleServerIRCBot):
             c.privmsg(self.channel, "I can answer questions like this: \"Who was [CLUB_POSITION] in [YEAR]?\" or \"When was [NAME] the [CLUB_POSITION]?\" Some positions include: president, vice president, treasurer, secretary, and webmaster. Note: not every year has info for every position.") 
         else:
             c.notice(nick, "Not understood: " + cmd)
+
+
+        time.sleep(1)
 
 def main():
     import sys

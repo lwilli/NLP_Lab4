@@ -29,7 +29,7 @@ import irc.strings
 from irc.client import ip_numstr_to_quad, ip_quad_to_numstr
 from bs4 import BeautifulSoup
 import requests
-import re
+import re, time
 
 initial_greetings = ["hello", "hey", "hi", "what's up", "how's it going", "how are you"]
 
@@ -96,10 +96,16 @@ class TestBot(irc.bot.SingleServerIRCBot):
                 dcc.localport))
         elif cmd in initial_greetings:
             c.notice(nick, cmd + " back to you!")
+        elif cmd == "*forget":
+            #forgets stuff
+            pass
         elif cmd == "about":
             c.privmsg(self.channel, "I was made by Justin Postigo and Logan Williams for Foaad Khosmood for the CPE 582 class in Fall 2016.")
         else:
             c.notice(nick, "Not understood: " + cmd)
+
+
+        time.sleep(1)
 
 def main():
     import sys

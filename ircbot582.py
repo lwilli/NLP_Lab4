@@ -27,16 +27,28 @@ The known commands are:
 import irc.bot
 import irc.strings
 from irc.client import ip_numstr_to_quad, ip_quad_to_numstr
-from bs4 import BeautifulSoup
-import requests
-import re, time, nltk
 import json
+import re, time
+import nltk
+
 
 with open('songs.json') as data_file:
     data = json.load(data_file)
 
 for song in data:
     data[song]["bigrams"] = nltk.bigrams(song["lyrics"])
+
+def get_song_match(comment_bigrams):
+    for song in data:
+        for song_bigram in data[song]['bigrams']:
+            if song_bigram in comment_bigrams:
+                regex = r"[^\/]*" + re.escape(" ".join(song_bigram)) + r"[^\/]*\/[^\/]*"
+                matches = re.match(regex, data[song]['lyrics'])
+                if matches:
+                    lyrics_snippet = matches.group(0)
+                    return (song, lyrics_snippet)
+    return (None,None) # no bigram match
+
 
 class TestBot(irc.bot.SingleServerIRCBot):
     previous_song = ""
@@ -58,7 +70,12 @@ class TestBot(irc.bot.SingleServerIRCBot):
         a = e.arguments[0].split(":", 1)
         if len(a) > 1 and irc.strings.lower(a[0]) == irc.strings.lower(self.connection.get_nickname()):
             self.do_command(e, a[1].strip())
-        return
+        else:
+            comment_bigrams = list(nltk.bigrams(nltk.word_tokenize(e.arguments[0])))
+            song_match,lyrics_snippet = get_song_match(comment_bigrams)
+            if lyrics_snippet:
+                c.privmsg(self.channel, lyrics_snippet)
+                previous_song = song_match
 
     def on_dccmsg(self, c, e):
         # non-chat DCC messages are raw bytes; decode as text

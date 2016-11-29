@@ -33,6 +33,7 @@ import re, time
 
 initial_greetings = ["hello", "hey", "hi", "what's up", "how's it going", "how are you"]
 
+
 class TestBot(irc.bot.SingleServerIRCBot):
 
     def __init__(self, channel, nickname, server, port=6667):
@@ -49,6 +50,7 @@ class TestBot(irc.bot.SingleServerIRCBot):
         self.do_command(e, e.arguments[0])
 
     def on_pubmsg(self, c, e):
+        c.notice(self.channel, "Hey there!")
         a = e.arguments[0].split(":", 1)
         if len(a) > 1 and irc.strings.lower(a[0]) == irc.strings.lower(self.connection.get_nickname()):
             self.do_command(e, a[1].strip())
@@ -94,16 +96,22 @@ class TestBot(irc.bot.SingleServerIRCBot):
             c.ctcp("DCC", nick, "CHAT chat %s %d" % (
                 ip_quad_to_numstr(dcc.localaddress),
                 dcc.localport))
-        elif cmd in initial_greetings:
-            c.notice(nick, cmd + " back to you!")
+        #elif cmd in initial_greetings:
+        #    c.notice(nick, cmd + " back to you!")
         elif cmd == "*forget":
             #forgets stuff
             pass
         elif cmd == "about":
             c.privmsg(self.channel, "I was made by Justin Postigo and Logan Williams for Foaad Khosmood for the CPE 582 class in Fall 2016.")
+        elif cmd.lower() in ['hi','hello']:
+            c.privmsg(self.channel, str(nick) + ": Hello!")
+        elif cmd.lower() in ['how are you?',"what's happening?"]:
+            c.privmsg(self.channel, str(nick) + ": I'm fine")
+            time.sleep(1)
+            c.privmsg(self.channel, str(nick) + ": how about you?")
+
         else:
             c.notice(nick, "Not understood: " + cmd)
-
 
         time.sleep(1)
 

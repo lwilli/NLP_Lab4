@@ -29,12 +29,17 @@ import irc.strings
 from irc.client import ip_numstr_to_quad, ip_quad_to_numstr
 from bs4 import BeautifulSoup
 import requests
-import re, time
+import re, time, nltk
+import json
 
-initial_greetings = ["hello", "hey", "hi", "what's up", "how's it going", "how are you"]
+with open('songs.json') as data_file:
+    data = json.load(data_file)
 
+for song in data:
+    data[song]["bigrams"] = nltk.bigrams(song["lyrics"])
 
 class TestBot(irc.bot.SingleServerIRCBot):
+    previous_song = ""
 
     def __init__(self, channel, nickname, server, port=6667):
         irc.bot.SingleServerIRCBot.__init__(self, [(server, port)], nickname, nickname)
@@ -50,7 +55,6 @@ class TestBot(irc.bot.SingleServerIRCBot):
         self.do_command(e, e.arguments[0])
 
     def on_pubmsg(self, c, e):
-        c.notice(self.channel, "Hey there!")
         a = e.arguments[0].split(":", 1)
         if len(a) > 1 and irc.strings.lower(a[0]) == irc.strings.lower(self.connection.get_nickname()):
             self.do_command(e, a[1].strip())
@@ -100,7 +104,7 @@ class TestBot(irc.bot.SingleServerIRCBot):
         #    c.notice(nick, cmd + " back to you!")
         elif cmd == "*forget":
             #forgets stuff
-            pass
+            self.previous_song = ""
         elif cmd == "about":
             c.privmsg(self.channel, "I was made by Justin Postigo and Logan Williams for Foaad Khosmood for the CPE 582 class in Fall 2016.")
         elif cmd.lower() in ['hi','hello']:
@@ -109,7 +113,21 @@ class TestBot(irc.bot.SingleServerIRCBot):
             c.privmsg(self.channel, str(nick) + ": I'm fine")
             time.sleep(1)
             c.privmsg(self.channel, str(nick) + ": how about you?")
-
+        elif cmd.lower() == "who sings that?":
+            if self.previous_song != "":
+                c.privmsg(self.channel, str(data[self.previous_song]["author"]))
+            else:
+                c.privmsg(self.channel, "I don't know what you mean!")
+        elif cmd.lower() == "what is that song?":
+            if self.previous_song != "":
+                c.privmsg(self.channel, str(self.previous_song))
+            else:
+                c.privmsg(self.channel, "I don't know what you mean!")
+        elif cmd.lower() == "what year did that song come out?":
+            if self.previous_song != "":
+                c.privmsg(self.channel, str(data[self.previous_song]["year"]))
+            else:
+                c.privmsg(self.channel, "I don't know what you mean!")
         else:
             c.notice(nick, "Not understood: " + cmd)
 

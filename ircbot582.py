@@ -66,6 +66,7 @@ class TestBot(irc.bot.SingleServerIRCBot):
         self.do_command(e, e.arguments[0])
 
     def on_pubmsg(self, c, e):
+        nick = e.source.nick
         a = e.arguments[0].split(":", 1)
         if len(a) > 1 and irc.strings.lower(a[0]) == irc.strings.lower(self.connection.get_nickname()):
             self.do_command(e, a[1].strip())
@@ -74,7 +75,8 @@ class TestBot(irc.bot.SingleServerIRCBot):
             song_match,lyrics_snippet = get_song_match(comment_bigrams)
             if lyrics_snippet:
                 time.sleep(3)
-                c.privmsg(self.channel, lyrics_snippet)
+                c.privmsg(self.channel, nick + " just said '" + e.arguments[0] +
+                          "', and it reminded me of: " + lyrics_snippet)
                 self.previous_song = song_match
 
     def on_dccmsg(self, c, e):
@@ -99,6 +101,7 @@ class TestBot(irc.bot.SingleServerIRCBot):
 
         nick = e.source.nick
         c = self.connection
+
 
         if cmd == "disconnect":
             self.disconnect()
@@ -132,24 +135,28 @@ class TestBot(irc.bot.SingleServerIRCBot):
             c.privmsg(self.channel, str(nick) + ": I'm fine")
             time.sleep(1)
             c.privmsg(self.channel, str(nick) + ": how about you?")
+            self.reactor.scheduler.execute_after(30,
+                                        lambda: self.do_command(e, "angry"))
         elif cmd.lower() == "who sings that?":
             if self.previous_song != "":
-                c.privmsg(self.channel, str(data[self.previous_song]["artist"]))
+                c.privmsg(self.channel, str(nick) + ": " + str(data[self.previous_song]["artist"]))
             else:
                 c.privmsg(self.channel, "I don't know what you mean!")
         elif cmd.lower() == "what is that song?":
             if self.previous_song != "":
-                c.privmsg(self.channel, "It's " + str(self.previous_song) + " by " +
+                c.privmsg(self.channel, str(nick) + ": " + "It's " + str(self.previous_song) + " by " +
                           str(data[self.previous_song]["artist"]))
             else:
                 c.privmsg(self.channel, "I don't know what you mean!")
         elif cmd.lower() == "what year did that song come out?":
             if self.previous_song != "":
-                c.privmsg(self.channel, str(data[self.previous_song]["year"]))
+                c.privmsg(self.channel, str(nick) + ": " + str(data[self.previous_song]["year"]))
             else:
                 c.privmsg(self.channel, "I don't know what you mean!")
         elif cmd.lower() in ["i'm fine", "i'm good", "i'm fine, thanks for asking"]:
-            pass
+            self.reactor.scheduler = self.reactor.scheduler_class()
+        elif cmd == "angry":
+            c.privmsg(self.channel, str(nick) + ": Ok, forget you.")
         else:
             c.notice(nick, "Not understood: " + cmd)
 

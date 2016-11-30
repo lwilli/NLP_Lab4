@@ -36,19 +36,18 @@ with open('songs.json') as data_file:
     data = json.load(data_file)
 
 for song in data:
-    data[song]["bigrams"] = nltk.bigrams(song["lyrics"])
+    data[song]["bigrams"] = list(nltk.bigrams(nltk.word_tokenize(data[song]["lyrics"])))
 
 def get_song_match(comment_bigrams):
     for song in data:
         for song_bigram in data[song]['bigrams']:
             if song_bigram in comment_bigrams:
                 regex = r"[^\/]*" + re.escape(" ".join(song_bigram)) + r"[^\/]*\/[^\/]*"
-                matches = re.match(regex, data[song]['lyrics'])
+                matches = re.search(regex, data[song]['lyrics'])
                 if matches:
                     lyrics_snippet = matches.group(0)
                     return (song, lyrics_snippet)
     return (None,None) # no bigram match
-
 
 class TestBot(irc.bot.SingleServerIRCBot):
     previous_song = ""
@@ -74,8 +73,9 @@ class TestBot(irc.bot.SingleServerIRCBot):
             comment_bigrams = list(nltk.bigrams(nltk.word_tokenize(e.arguments[0])))
             song_match,lyrics_snippet = get_song_match(comment_bigrams)
             if lyrics_snippet:
+                time.sleep(3)
                 c.privmsg(self.channel, lyrics_snippet)
-                previous_song = song_match
+                self.previous_song = song_match
 
     def on_dccmsg(self, c, e):
         # non-chat DCC messages are raw bytes; decode as text
@@ -95,6 +95,8 @@ class TestBot(irc.bot.SingleServerIRCBot):
             self.dcc_connect(address, port)
 
     def do_command(self, e, cmd):
+        time.sleep(2)
+
         nick = e.source.nick
         c = self.connection
 
@@ -132,12 +134,13 @@ class TestBot(irc.bot.SingleServerIRCBot):
             c.privmsg(self.channel, str(nick) + ": how about you?")
         elif cmd.lower() == "who sings that?":
             if self.previous_song != "":
-                c.privmsg(self.channel, str(data[self.previous_song]["author"]))
+                c.privmsg(self.channel, str(data[self.previous_song]["artist"]))
             else:
                 c.privmsg(self.channel, "I don't know what you mean!")
         elif cmd.lower() == "what is that song?":
             if self.previous_song != "":
-                c.privmsg(self.channel, str(self.previous_song))
+                c.privmsg(self.channel, "It's " + str(self.previous_song) + " by " +
+                          str(data[self.previous_song]["artist"]))
             else:
                 c.privmsg(self.channel, "I don't know what you mean!")
         elif cmd.lower() == "what year did that song come out?":
@@ -145,10 +148,12 @@ class TestBot(irc.bot.SingleServerIRCBot):
                 c.privmsg(self.channel, str(data[self.previous_song]["year"]))
             else:
                 c.privmsg(self.channel, "I don't know what you mean!")
+        elif cmd.lower() in ["i'm fine", "i'm good", "i'm fine, thanks for asking"]:
+            pass
         else:
             c.notice(nick, "Not understood: " + cmd)
 
-        time.sleep(1)
+
 
 def main():
     import sys

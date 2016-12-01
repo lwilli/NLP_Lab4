@@ -1,0 +1,18 @@
+[16:01] <log> tweetyswift-bot: hi
+[16:01] <TweetySwift-bot> log: Hello!
+[16:01] <log> tweetyswift-bot: how are you?
+[16:01] <TweetySwift-bot> log: I'm fine
+[16:01] <TweetySwift-bot> log: how about you?
+[16:01] <TweetySwift-bot> log: Ok, forget you.
+[16:01] <log> Guys, IRC is really out of style now...
+[16:01] <TweetySwift-bot> log just said 'Guys, IRC is really out of style now...', and it reminded me of: 'Cause we never go out of style/We never go out of style
+[16:02] <log> tweetyswift-bot: what is that song?
+[16:02] <TweetySwift-bot> log: It's Style by Taylor Swift
+[16:02] <log> tweetyswift-bot: what year did that song come out?
+[16:02] <TweetySwift-bot> log: 2014
+[16:02] <log> tweetyswift-bot: who sings that?
+[16:02] <TweetySwift-bot> log: Taylor Swift
+[16:03] <log> Did you guys check under the table for power outlets?
+[16:03] <TweetySwift-bot> log just said 'Did you guys check under the table for power outlets?', and it reminded me of: Santa baby, slip a sable under the tree, for me/I've been an awful good girl, santa baby
+[16:03] <justin_> TweetySwift-bot: what is that song?
+[16:03] <TweetySwift-bot> justin_: It's Santa Baby by Taylor Swift
